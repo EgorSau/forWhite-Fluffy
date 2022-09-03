@@ -468,17 +468,19 @@ extension PhotosViewController: UICollectionViewDataSource, UICollectionViewDele
         cell.backgroundColor = .systemBlue
 
         if self.images.isEmpty {
-            NetworkService().urlRequest { (pictures, authors, locations, dates) in
-                cell.photoImage.image = pictures[indexPath.row]
-                self.images = pictures
-                self.authors = authors
-                self.locations = locations
-                self.dates = dates
+            DispatchQueue.global(qos: .utility).async {
+                NetworkService().urlRequest { (pictures, authors, locations, dates) in
+                    cell.photoImage.image = pictures[indexPath.row]
+                    self.images = pictures
+                    self.authors = authors
+                    self.locations = locations
+                    self.dates = dates
+                }
             }
         } else {
             cell.photoImage.image = self.images[indexPath.row]
         }
-        
+
         return cell
     }
     

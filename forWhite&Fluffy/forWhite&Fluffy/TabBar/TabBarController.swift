@@ -41,8 +41,8 @@ class TabBarController: UITabBarController {
 
         var arrayVC: [UIViewController] = [TableViewController(), PhotosViewController()]
         
-        arrayVC[0] = UINavigationController(rootViewController: TableViewController())
-        arrayVC[1] = UINavigationController(rootViewController: PhotosViewController())
+        arrayVC[0] = UINavigationController(rootViewController: PhotosViewController())
+        arrayVC[1] = UINavigationController(rootViewController: TableViewController())
         
         self.viewControllers = arrayVC.map({ tabBarItem in
             switch tabBarItem {
@@ -59,11 +59,11 @@ class TabBarController: UITabBarController {
         arrayVC.enumerated().forEach({ (index, viewController) in
             switch index {
             case 0:
-                viewController.tabBarItem.image = UIImage (systemName: Index.second.image)
-                viewController.tabBarItem.title = Index.second.title
-            case 1:
                 viewController.tabBarItem.image = UIImage(systemName: Index.first.image)
                 viewController.tabBarItem.title = Index.first.title
+            case 1:
+                viewController.tabBarItem.image = UIImage (systemName: Index.second.image)
+                viewController.tabBarItem.title = Index.second.title
             default:
                 viewController.tabBarItem.title = Index.none.title
             }

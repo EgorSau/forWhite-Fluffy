@@ -37,7 +37,7 @@ class TableViewController: UIViewController {
     private func setupTableView() {
         self.view.backgroundColor = .white
         self.navigationItem.title = "Favorites"
-        NotificationCenter.default.addObserver(self, selector: #selector(getDataFromPhotoViewController), name: Notification.Name(rawValue: "dataFromCollection"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(getDataFromPhotoViewController), name: Notification.Name.dataFromCollection, object: nil)
         self.view.addSubview(self.tableView)
         
         let topConstraint = self.tableView.topAnchor.constraint(equalTo: self.view.topAnchor)

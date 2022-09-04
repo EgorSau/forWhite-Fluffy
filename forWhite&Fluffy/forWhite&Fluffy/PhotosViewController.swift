@@ -6,13 +6,6 @@
 //
 
 import UIKit
-import Alamofire
-
-protocol ViewModelProtocol {}
-
-protocol Setupable {
-    func setup(with viewModel: ViewModelProtocol)
-}
 
 class PhotosViewController: UIViewController, UITextFieldDelegate {
     
@@ -26,8 +19,6 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
     var leftConstraint: NSLayoutConstraint?
     var rightConstraint: NSLayoutConstraint?
     var bottomConstraint: NSLayoutConstraint?
-    let token = "xOZhFXxLD9YKp4qiq7SaLlJzLLs8nHrTCdUtOOQlmAc"
-    var searchText: String = ""
     var tempStrArray = [String]()
     var tempImgArray = [UIImage]()
     var dictionary: [String : Any] = ["authors": [String](), "images": [UIImage]()]
@@ -83,7 +74,7 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
         return addButton
     }()
     
-    private lazy var photoLabel: UILabel = {
+    lazy var photoLabel: UILabel = {
         var photoLabel = UILabel()
         photoLabel.numberOfLines = 3
         photoLabel.lineBreakStrategy = .pushOut
@@ -227,24 +218,19 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
         self.view.addSubview(addButton)
         self.view.addSubview(deleteButton)
         
-        enum Constants: CGFloat {
-            case positiveBasicSpacing = 8
-            case negativeBasicSpacing = -8
-        }
-        
         //MARK: Add button
         let top = self.addButton.topAnchor.constraint(equalTo: self.photoLabel.bottomAnchor, constant: 20)
-        let left = self.addButton.leftAnchor.constraint(equalTo: self.view.leftAnchor, constant: Constants.positiveBasicSpacing.rawValue)
+        let left = self.addButton.leftAnchor.constraint(equalTo: self.view.leftAnchor, constant: BasicSpacing.positive.rawValue)
 
         //MARK: Delete button
         let top2 = self.deleteButton.topAnchor.constraint(equalTo: self.photoLabel.bottomAnchor, constant: 20)
-        let left2 = self.deleteButton.leftAnchor.constraint(equalTo: self.addButton.rightAnchor, constant: Constants.positiveBasicSpacing.rawValue)
-        let right = self.deleteButton.rightAnchor.constraint(equalTo: self.view.rightAnchor, constant: Constants.negativeBasicSpacing.rawValue)
+        let left2 = self.deleteButton.leftAnchor.constraint(equalTo: self.addButton.rightAnchor, constant: BasicSpacing.positive.rawValue)
+        let right = self.deleteButton.rightAnchor.constraint(equalTo: self.view.rightAnchor, constant: BasicSpacing.negative.rawValue)
         
         //MARK: Width calculation
 
         let screenWidth = CGFloat(self.view.frame.width)
-        let buttonsWidth = (screenWidth - Constants.positiveBasicSpacing.rawValue * 3)/2
+        let buttonsWidth = (screenWidth - BasicSpacing.positive.rawValue * 3)/2
         let width = self.addButton.widthAnchor.constraint(equalToConstant: buttonsWidth)
         let width2 = self.deleteButton.widthAnchor.constraint(equalToConstant: buttonsWidth)
         
@@ -273,48 +259,14 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
                                      width
                                     ])
     }
-
-    @objc private func searchRequest(completion: @escaping ([UIImage]) -> Void){
-        let url = URL(string: "https://api.unsplash.com/search/photos?query=\(self.searchText)")
-        var request = URLRequest(url: url!)
-        request.setValue("Client-ID \(self.token)", forHTTPHeaderField: "Authorization")
-        AF.request(request).responseDecodable(of: Results.self) { response in
-            guard let value = response.value else { return }
-            var imagesArray = [UIImage]()
-            for each in value.results {
-                //String data
-                let author = each.user.name
-                let creation_date = each.created_at
-                let location = each.user.location
-                self.authors.append(author)
-                self.dates.append(creation_date)
-                self.locations.append(location)
-                
-                //Pictures data
-                guard let pictureName = each.urls.small else { return }
-                guard let url = URL(string: pictureName)
-                else {
-                    print("Unable to create URL")
-                    return
-                }
-                do {
-                    let data = try Data(contentsOf: url, options: [])
-                    guard let image = UIImage(data: data) else { return }
-                    imagesArray.append(image)
-                }
-                catch {
-                    print(error.localizedDescription)
-                }
-            }
-            self.collectionView.reloadData()
-            completion(imagesArray)
-        }
-    }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        self.searchText = textField.text!
-        self.searchRequest{ Pictures in
-            self.images = Pictures
+        NetworkService().searchRequest(withText: textField.text!) { (pictures, authors, locations, dates) in
+                self.collectionView.reloadData()
+                self.images = pictures
+                self.authors = authors
+                self.locations = locations
+                self.dates = dates
         }
         return true
     }
@@ -326,7 +278,9 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
             self.tempStrArray.remove(at: index)
             self.dictionary["authors"] = self.tempStrArray
             self.dictionary["images"] = self.tempImgArray
-            NotificationCenter.default.post(name: Notification.Name(rawValue: "dataFromCollection"), object: nil, userInfo: self.dictionary)
+            NotificationCenter.default.post(name: Notification.Name.dataFromCollection,
+                                            object: nil,
+                                            userInfo: self.dictionary)
             self.collectionView.reloadData()
             self.deletedAlert()
         }
@@ -339,21 +293,28 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
         self.tempStrArray.append(author)
         self.dictionary["authors"] = self.tempStrArray
         self.dictionary["images"] = self.tempImgArray
-        NotificationCenter.default.post(name: Notification.Name(rawValue: "dataFromCollection"), object: nil, userInfo: self.dictionary)
+        NotificationCenter.default.post(name: Notification.Name.dataFromCollection,
+                                        object: nil, userInfo: self.dictionary)
         self.collectionView.reloadData()
         self.addedAlert()
     }
     
     private func deletedAlert() {
-        let alert = UIAlertController(title: "Warning!", message: "This picture was deleted from favorites", preferredStyle: .alert)
-        let action = UIAlertAction(title: "ОК", style: .default)
+        let alert = UIAlertController(title: Alert.warningTitle.rawValue,
+                                      message: Alert.warningMessage.rawValue,
+                                      preferredStyle: .alert)
+        let action = UIAlertAction(title: Alert.actionTitle.rawValue,
+                                   style: .default)
         present(alert, animated: true, completion: .none)
         alert.addAction(action)
     }
     
     private func addedAlert() {
-        let alert = UIAlertController(title: "Great!", message: "This picture was added to favorites", preferredStyle: .alert)
-        let action = UIAlertAction(title: "ОК", style: .default)
+        let alert = UIAlertController(title: Alert.greatTitle.rawValue,
+                                      message: Alert.greatMessage.rawValue,
+                                      preferredStyle: .alert)
+        let action = UIAlertAction(title: Alert.actionTitle.rawValue,
+                                   style: .default)
         present(alert, animated: true, completion: .none)
         alert.addAction(action)
     }
@@ -453,56 +414,3 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
         }
     }
 }
-
-extension PhotosViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UICollectionViewDelegate {
-    
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 10
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "GalleryCell", for: indexPath) as? PhotosCollectionViewCell else {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "DefaultCell", for: indexPath)
-            return cell
-        }
-        cell.backgroundColor = .systemBlue
-
-        if self.images.isEmpty {
-            DispatchQueue.global(qos: .utility).async {
-                NetworkService().urlRequest { (pictures, authors, locations, dates) in
-                    cell.photoImage.image = pictures[indexPath.row]
-                    self.images = pictures
-                    self.authors = authors
-                    self.locations = locations
-                    self.dates = dates
-                }
-            }
-        } else {
-            cell.photoImage.image = self.images[indexPath.row]
-        }
-
-        return cell
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let spacing = (collectionView.collectionViewLayout as? UICollectionViewFlowLayout)?.minimumInteritemSpacing
-        let collection = PhotosCollectionViewCell()
-        return collection.itemSize(for: collectionView.frame.width, with: spacing ?? 0)
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        guard let _ = collectionView.dequeueReusableCell(withReuseIdentifier: "GalleryCell", for: indexPath) as? PhotosCollectionViewCell else {return}
-        self.imageZoom(forCell: indexPath)
-    }
-}
-
-
-extension PhotosViewController: Setupable {
-    
-    func setup(with viewModel: ViewModelProtocol) {
-        guard let viewModel = viewModel as? ViewModel else { return }
-        //MARK: To check how to make text from next line
-        self.photoLabel.text = "Author: \(viewModel.author)\nCreation date: \(viewModel.creationDate)\nLocation: \(viewModel.location)"
-    }
-}
-

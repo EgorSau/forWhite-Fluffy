@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2094B0C228C4F2A8001CC26C /* Extentions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2094B0C128C4F2A8001CC26C /* Extentions.swift */; };
+		2094B0C428C4F447001CC26C /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2094B0C328C4F447001CC26C /* Constants.swift */; };
 		20C2247928C3572C0057037A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20C2247828C3572C0057037A /* AppDelegate.swift */; };
 		20C2247B28C3572C0057037A /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20C2247A28C3572C0057037A /* SceneDelegate.swift */; };
 		20C2248228C3572E0057037A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 20C2248128C3572E0057037A /* Assets.xcassets */; };
@@ -23,6 +25,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		2094B0C128C4F2A8001CC26C /* Extentions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extentions.swift; sourceTree = "<group>"; };
+		2094B0C328C4F447001CC26C /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		20C2247528C3572C0057037A /* forWhite&Fluffy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "forWhite&Fluffy.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		20C2247828C3572C0057037A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		20C2247A28C3572C0057037A /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -115,6 +119,7 @@
 			children = (
 				20C2249528C358EB0057037A /* PhotosViewController.swift */,
 				20C2249728C358F50057037A /* PhotosCollectionViewCell.swift */,
+				2094B0C128C4F2A8001CC26C /* Extentions.swift */,
 			);
 			name = Collection;
 			sourceTree = "<group>";
@@ -144,6 +149,7 @@
 			children = (
 				20C2249328C358E20057037A /* Model.swift */,
 				20C224A028C361940057037A /* NetworkService.swift */,
+				2094B0C328C4F447001CC26C /* Constants.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -274,6 +280,7 @@
 				20C224A128C361940057037A /* NetworkService.swift in Sources */,
 				20C2249E28C3594F0057037A /* PhotosTableViewCell.swift in Sources */,
 				20C2249228C358C50057037A /* TabBarController.swift in Sources */,
+				2094B0C228C4F2A8001CC26C /* Extentions.swift in Sources */,
 				20C2249A28C359380057037A /* TableViewController.swift in Sources */,
 				20C2247928C3572C0057037A /* AppDelegate.swift in Sources */,
 				20C2249C28C359440057037A /* DetailsViewController.swift in Sources */,
@@ -281,6 +288,7 @@
 				20C2249428C358E20057037A /* Model.swift in Sources */,
 				20C2249628C358EB0057037A /* PhotosViewController.swift in Sources */,
 				20C2249828C358F50057037A /* PhotosCollectionViewCell.swift in Sources */,
+				2094B0C428C4F447001CC26C /* Constants.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

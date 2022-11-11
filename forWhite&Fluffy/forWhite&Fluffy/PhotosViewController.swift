@@ -10,7 +10,7 @@ import UIKit
 class PhotosViewController: UIViewController, UITextFieldDelegate {
     
     var isExpanded = false
-    let exitTapGestureRecognizer = UITapGestureRecognizer()
+    let exitTapGesture = UITapGestureRecognizer()
     var images = [UIImage]()
     var authors = [String?]()
     var dates = [String?]()
@@ -134,10 +134,41 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
         self.viewSetup()
         self.imageSetup()
         self.exitSetup()
-        self.setupGesture()
+        self.setupExitGesture()
         self.setupTextField()
         self.photoLabelSetup()
         self.buttonsSetup()
+        self.KbdNotificatorAppearance()
+    }
+    
+    deinit {
+        self.KbdNotificatorRemove()
+    }
+    
+    func KbdNotificatorAppearance() {
+        let nc = NotificationCenter.default
+        nc.addObserver(self, selector: #selector(self.kbdShow), name: UIResponder.keyboardWillShowNotification, object: nil)
+        nc.addObserver(self, selector: #selector(self.kbdHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+        
+    func KbdNotificatorRemove() {
+        let nc = NotificationCenter.default
+        nc.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
+        nc.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    @objc private func kbdShow(notification: NSNotification) {
+        if let kbdSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
+//            self.collectionView.contentOffset = CGPoint(x: 0, y: kbdSize.height/4)
+            self.collectionView.verticalScrollIndicatorInsets = UIEdgeInsets(top: 0,left: 0, bottom: kbdSize.height, right: 0)
+        }
+    }
+    
+    @objc private func kbdHide(notification: NSNotification) {
+//        if let kbdSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
+//            self.collectionView.contentOffset = CGPoint(x: 0, y: -kbdSize.height/4)
+            self.collectionView.verticalScrollIndicatorInsets = .zero
+//        }
     }
     
     private func viewSetup(){
@@ -320,6 +351,7 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
     }
     
     func imageZoom(forCell: IndexPath){
+        textField.resignFirstResponder()
         self.imageView.image = self.images[forCell.row]
         guard let author = self.authors[forCell.row] else { return }
         guard let date = self.dates[forCell.row] else { return }
@@ -361,17 +393,16 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
         }
     }
     
-    func setupGesture(){
-        self.exitImageView.addGestureRecognizer(self.exitTapGestureRecognizer)
-        self.exitTapGestureRecognizer.addTarget(self, action: #selector(self.exitHandleTapGesture))
+    func setupExitGesture(){
+        self.exitImageView.addGestureRecognizer(self.exitTapGesture)
+        self.exitTapGesture.addTarget(self, action: #selector(self.exitHandleTapGesture))
     }
     
     @objc private func exitHandleTapGesture(_ gestureRecognizer: UITapGestureRecognizer){
-        guard self.exitTapGestureRecognizer === gestureRecognizer else { return }
-        
+        guard self.exitTapGesture === gestureRecognizer else { return }
+
         self.isExpanded.toggle()
         if self.isExpanded {
-            
             UIView.animate(withDuration: 0.5, delay: 0.0) {
                 self.imageView.alpha = 0
                 self.photoLabel.alpha = 0
@@ -383,6 +414,9 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
                 self.rightConstraint?.isActive = true
                 self.bottomConstraint?.isActive = true
                 self.view.layoutIfNeeded()
+            }
+            if textField.isHidden == false {
+                self.textField.becomeFirstResponder()
             }
         }
     }
@@ -405,6 +439,7 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
         UIView.animate(withDuration: 0.5, delay: 0.0) {
             self.textField.alpha = 0
             self.textField.isHidden = true
+            self.textField.resignFirstResponder()
             self.navigationItem.title = "Photo Gallery"
             self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "magnifyingglass"),
                                                                      style: .plain,

@@ -9,8 +9,8 @@ import UIKit
 
 class DetailsViewController: UIViewController{
     
-    var imagesArray = [UIImage]()
-    var stringsArray = [String]()
+//    var imagesArray = [UIImage]()
+//    var stringsArray = [String]()
     var indexPath: IndexPath = [0, 0]
     var image = UIImage()
     var text: String = ""
@@ -38,7 +38,20 @@ class DetailsViewController: UIViewController{
         self.viewSetup()
         self.imageSetup()
         self.photoLabelSetup()
-
+    }
+    
+//    init? (_ coder: NSCoder, notification: Notification) {
+    init? (image: UIImage, text: String) {
+        super.init(coder: NSCoder())
+//        guard let userInfo = notification.userInfo else { return }
+//        guard let authors = userInfo["authors"] as? [String] else { return }
+//        guard let images = userInfo["images"] as? [UIImage] else { return }
+        self.imageView.image = image
+        self.photoLabel.text = text
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     private func viewSetup(){
@@ -77,12 +90,12 @@ class DetailsViewController: UIViewController{
                                     ])
     }
     
-    @objc func getDataFromTableViewController(notification: Notification){
-        guard let userInfo = notification.userInfo else { return }
-        guard let authors = userInfo["authors"] as? [String] else { return }
-        guard let images = userInfo["images"] as? [UIImage] else { return }
-        self.imageView.image = images[self.indexPath.row]
-        self.photoLabel.text = authors[self.indexPath.row]
-    }
+//    @objc func getDataFromTableViewController(notification: Notification){
+//        guard let userInfo = notification.userInfo else { return }
+//        guard let authors = userInfo["authors"] as? [String] else { return }
+//        guard let images = userInfo["images"] as? [UIImage] else { return }
+//        self.imageView.image = images[self.indexPath.row]
+//        self.photoLabel.text = authors[self.indexPath.row]
+//    }
     
 }

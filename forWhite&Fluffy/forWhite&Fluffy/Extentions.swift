@@ -29,7 +29,6 @@ extension PhotosViewController: UICollectionViewDataSource, UICollectionViewDele
             return cell
         }
         cell.backgroundColor = .systemBlue
-
         if self.images.isEmpty {
             DispatchQueue.global(qos: .utility).async {
                 NetworkService().urlRequest { (pictures, authors, locations, dates) in
@@ -43,7 +42,6 @@ extension PhotosViewController: UICollectionViewDataSource, UICollectionViewDele
         } else {
             cell.photoImage.image = self.images[indexPath.row]
         }
-
         return cell
     }
     
@@ -64,7 +62,6 @@ extension PhotosViewController: Setupable {
     
     func setup(with viewModel: ViewModelProtocol) {
         guard let viewModel = viewModel as? ViewModel else { return }
-        //MARK: To check how to make text from next line
         self.photoLabel.text = "Author: \(viewModel.author)\nCreation date: \(viewModel.creationDate)\nLocation: \(viewModel.location)"
     }
 }

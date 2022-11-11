@@ -61,11 +61,11 @@ class TableViewController: UIViewController {
     }
     
     func pushToPhotoCollection(indexPath: IndexPath) {
-        let detailsVC = DetailsViewController()
+        guard let detailsVC = DetailsViewController(image: self.imagesArray[indexPath.row], text: self.stringsArray[indexPath.row]) else { return }
         navigationController?.pushViewController(detailsVC, animated: true)
         detailsVC.indexPath = indexPath
-        detailsVC.image = self.imagesArray[indexPath.row]
-        detailsVC.text = self.stringsArray[indexPath.row]
+//        detailsVC.image = self.imagesArray[indexPath.row]
+//        detailsVC.text = self.stringsArray[indexPath.row]
     }
 
 }

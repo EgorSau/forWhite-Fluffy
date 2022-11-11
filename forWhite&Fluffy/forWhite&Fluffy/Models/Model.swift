@@ -7,14 +7,14 @@
 
 import UIKit
 
-//Randome
+//MARK: Randome
 struct Pictures: Decodable {
     let created_at: String?
     let urls: Urls
     let user: Users
 }
 
-//Search
+//MARK: Search
 struct Results: Decodable {
     let results: [Result]
 }
@@ -27,7 +27,7 @@ struct Result: Decodable {
     let user: Users
 }
 
-//Common
+//MARK: Common
 struct Urls: Decodable {
     let small: String?
 }

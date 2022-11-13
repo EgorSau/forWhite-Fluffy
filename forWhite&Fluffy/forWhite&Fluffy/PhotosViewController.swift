@@ -130,6 +130,7 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.fetchPosts()
         self.setupCollectionView()
         self.viewSetup()
         self.imageSetup()
@@ -145,6 +146,78 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
         self.KbdNotificatorRemove()
     }
     
+    func fetchPosts(){
+        DispatchQueue.global(qos: .utility).async {
+            NetworkService().urlRequest { [weak self] posts in
+                guard let self = self else { return }
+                switch posts {
+                case .failure(let error):
+                    print("ОШИБКА")
+                    print(error)
+                case .success(let result):
+                    var imagesArray = [UIImage]()
+                    var authors = [String?]()
+                    var locations = [String?]()
+                    var dates = [String?]()
+                    try result.forEach { post in
+                        self.collectionView.reloadData()
+                        guard let pictureName = post.urls.small else { return }
+                        guard let url = URL(string: pictureName) else { return }
+                        let data = try Data(contentsOf: url, options: [])
+                        guard let image = UIImage(data: data) else { return }
+                        imagesArray.append(image)
+                        authors.append(post.user.name)
+                        locations.append(post.user.location)
+                        dates.append(post.created_at)
+                    }
+                    self.images = imagesArray
+                    self.authors = authors
+                    self.locations = locations
+                    self.dates = dates
+                }
+            }
+        }
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool  {
+        do {
+            NetworkService().searchRequest(withText: textField.text!) { [weak self] posts in
+                guard let self = self else { return }
+                switch posts {
+                case .failure(let error):
+                    print("ОШИБКА")
+                    print(error)
+                case .success(let result):
+                    var imagesArray = [UIImage]()
+                    var authors = [String?]()
+                    var locations = [String?]()
+                    var dates = [String?]()
+                    try result.results.forEach { post in
+                        if post.urls.small?.isEmpty == false {
+                            self.collectionView.reloadData()
+                            guard let pictureName = post.urls.small else { return }
+                            guard let url = URL(string: pictureName) else { return }
+                            let data = try Data(contentsOf: url, options: [])
+                            guard let image = UIImage(data: data) else { return }
+                            imagesArray.append(image)
+                            authors.append(post.user.name)
+                            locations.append(post.user.location)
+                            dates.append(post.created_at)
+                        } else {
+                            self.notFoundAlert()
+                        }
+                    }
+                    self.images = imagesArray
+                    self.authors = authors
+                    self.locations = locations
+                    self.dates = dates
+                }
+            }
+        }
+        return true
+    }
+    
+    //MARK: Keyboard
     func KbdNotificatorAppearance() {
         let nc = NotificationCenter.default
         nc.addObserver(self, selector: #selector(self.kbdShow), name: UIResponder.keyboardWillShowNotification, object: nil)
@@ -159,18 +232,15 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
     
     @objc private func kbdShow(notification: NSNotification) {
         if let kbdSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
-//            self.collectionView.contentOffset = CGPoint(x: 0, y: kbdSize.height/4)
             self.collectionView.verticalScrollIndicatorInsets = UIEdgeInsets(top: 0,left: 0, bottom: kbdSize.height, right: 0)
         }
     }
     
     @objc private func kbdHide(notification: NSNotification) {
-//        if let kbdSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
-//            self.collectionView.contentOffset = CGPoint(x: 0, y: -kbdSize.height/4)
             self.collectionView.verticalScrollIndicatorInsets = .zero
-//        }
     }
     
+    //MARK: Constraints
     private func viewSetup(){
         self.view.backgroundColor = .white
     }
@@ -259,7 +329,6 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
         let right = self.deleteButton.rightAnchor.constraint(equalTo: self.view.rightAnchor, constant: BasicSpacing.negative.rawValue)
         
         //MARK: Width calculation
-
         let screenWidth = CGFloat(self.view.frame.width)
         let buttonsWidth = (screenWidth - BasicSpacing.positive.rawValue * 3)/2
         let width = self.addButton.widthAnchor.constraint(equalToConstant: buttonsWidth)
@@ -290,18 +359,8 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
                                      width
                                     ])
     }
-    
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        NetworkService().searchRequest(withText: textField.text!) { (pictures, authors, locations, dates) in
-                self.collectionView.reloadData()
-                self.images = pictures
-                self.authors = authors
-                self.locations = locations
-                self.dates = dates
-        }
-        return true
-    }
 
+    //MARK: Methods
     @objc func deleteFromFavorites(){
         for (index, image) in tempImgArray.enumerated() {
             guard self.imageView.image == image else { return }
@@ -333,6 +392,16 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
     private func deletedAlert() {
         let alert = UIAlertController(title: Alert.warningTitle.rawValue,
                                       message: Alert.warningMessage.rawValue,
+                                      preferredStyle: .alert)
+        let action = UIAlertAction(title: Alert.actionTitle.rawValue,
+                                   style: .default)
+        present(alert, animated: true, completion: .none)
+        alert.addAction(action)
+    }
+    
+    private func notFoundAlert() {
+        let alert = UIAlertController(title: Alert.notFoundTitle.rawValue,
+                                      message: nil,
                                       preferredStyle: .alert)
         let action = UIAlertAction(title: Alert.actionTitle.rawValue,
                                    style: .default)

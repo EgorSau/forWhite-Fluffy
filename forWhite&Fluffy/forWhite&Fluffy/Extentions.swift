@@ -28,17 +28,8 @@ extension PhotosViewController: UICollectionViewDataSource, UICollectionViewDele
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "DefaultCell", for: indexPath)
             return cell
         }
-        cell.backgroundColor = .systemBlue
         if self.images.isEmpty {
-            DispatchQueue.global(qos: .utility).async {
-                NetworkService().urlRequest { (pictures, authors, locations, dates) in
-                    cell.photoImage.image = pictures[indexPath.row]
-                    self.images = pictures
-                    self.authors = authors
-                    self.locations = locations
-                    self.dates = dates
-                }
-            }
+            collectionView.reloadData()
         } else {
             cell.photoImage.image = self.images[indexPath.row]
         }

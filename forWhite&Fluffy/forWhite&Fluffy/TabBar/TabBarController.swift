@@ -22,9 +22,9 @@ class TabBarController: UITabBarController {
                 case .none:
                     return nil
                 case .first:
-                    return "Collection"
-                case .second:
                     return "Table"
+                case .second:
+                    return "Collection"
                 }
             }
             var image: String {
@@ -32,17 +32,17 @@ class TabBarController: UITabBarController {
                 case .none:
                     return ""
                 case .first:
-                    return "square.grid.2x2"
-                case .second:
                     return "tablecells"
+                case .second:
+                    return "square.grid.2x2"
                 }
             }
         }
 
         var arrayVC: [UIViewController] = [TableViewController(), PhotosViewController()]
         
-        arrayVC[0] = UINavigationController(rootViewController: PhotosViewController())
-        arrayVC[1] = UINavigationController(rootViewController: TableViewController())
+        arrayVC[0] = UINavigationController(rootViewController: TableViewController())
+        arrayVC[1] = UINavigationController(rootViewController: PhotosViewController())
         
         self.viewControllers = arrayVC.map({ tabBarItem in
             switch tabBarItem {

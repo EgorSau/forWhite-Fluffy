@@ -26,6 +26,7 @@ class TableViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+//        print("HELLO!")
         self.tableView.reloadData()
     }
 
@@ -61,11 +62,11 @@ class TableViewController: UIViewController {
     }
     
     func pushToPhotoCollection(indexPath: IndexPath) {
-        guard let detailsVC = DetailsViewController(image: self.imagesArray[indexPath.row], text: self.stringsArray[indexPath.row]) else { return }
+        let detailsVC = DetailsViewController()
         navigationController?.pushViewController(detailsVC, animated: true)
         detailsVC.indexPath = indexPath
-//        detailsVC.image = self.imagesArray[indexPath.row]
-//        detailsVC.text = self.stringsArray[indexPath.row]
+        detailsVC.image = self.imagesArray[indexPath.row]
+        detailsVC.text = self.stringsArray[indexPath.row]
     }
 
 }

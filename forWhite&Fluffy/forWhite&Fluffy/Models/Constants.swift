@@ -18,4 +18,5 @@ enum Alert: String {
     case greatTitle = "Great!"
     case greatMessage = "This picture was added to favorites"
     case actionTitle = "OK"
+    case notFoundTitle = "Please change keyword"
 }

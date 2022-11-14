@@ -7,14 +7,15 @@
 
 import UIKit
 
-//MARK: Randome
+// MARK: Randome
 struct Pictures: Decodable {
     let created_at: String?
     let urls: Urls
     let user: Users
+    let id: String
 }
 
-//MARK: Search
+// MARK: Search
 struct Results: Decodable {
     let results: [Result]
 }
@@ -27,7 +28,7 @@ struct Result: Decodable {
     let user: Users
 }
 
-//MARK: Common
+// MARK: Common
 struct Urls: Decodable {
     let small: String?
 }
@@ -37,3 +38,8 @@ struct Users: Decodable {
     let location: String?
 }
 
+struct ViewModel: ViewModelProtocol {
+    let author: String
+    let creationDate: String
+    let location: String
+}

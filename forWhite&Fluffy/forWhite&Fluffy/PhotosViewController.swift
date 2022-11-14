@@ -8,27 +8,23 @@
 import UIKit
 
 class PhotosViewController: UIViewController, UITextFieldDelegate {
-    
     var isExpanded = false
     let exitTapGesture = UITapGestureRecognizer()
     var images = [UIImage]()
     var authors = [String?]()
     var dates = [String?]()
     var locations = [String?]()
+    var id = [String]()
     var topConstraint: NSLayoutConstraint?
     var leftConstraint: NSLayoutConstraint?
     var rightConstraint: NSLayoutConstraint?
     var bottomConstraint: NSLayoutConstraint?
     var tempStrArray = [String]()
     var tempImgArray = [UIImage]()
-    var dictionary: [String : Any] = ["authors": [String](), "images": [UIImage]()]
-    
-    struct ViewModel: ViewModelProtocol {
-        let author: String
-        let creationDate: String
-        let location: String
-    }
-    
+    var tempFavArray = [String]()
+    var dictionary: [String: Any] = ["authors": [String](), "images": [UIImage](), "favorites": [String]()]
+    var favorite = ""
+
     lazy var textField: UITextField = {
         let textField = UITextField()
         textField.backgroundColor = .white
@@ -45,35 +41,31 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
         textField.placeholder = " Search"
         return textField
     }()
-    
     private lazy var addButton: UIButton = {
-        var addButton = UIButton()
-        addButton.isHidden = true
-        addButton.backgroundColor = .systemGreen
-        addButton.setTitle("Add to Favorites", for: .normal)
-        addButton.setTitleColor(.white, for: .normal)
-        addButton.alpha = 0
-        addButton.layer.cornerRadius = 8
-        addButton.titleLabel?.text = ""
-        addButton.translatesAutoresizingMaskIntoConstraints = false
-        addButton.addTarget(.none, action: #selector(addToFavorites), for: .touchUpInside)
-        return addButton
+        var button = UIButton()
+        button.backgroundColor = .systemGreen
+        button.setTitle("Add to Favorites", for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.alpha = 0
+        button.layer.cornerRadius = 8
+        button.titleLabel?.text = ""
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(.none, action: #selector(addToFavorites), for: .touchUpInside)
+        return button
     }()
-    
     private lazy var deleteButton: UIButton = {
-        var addButton = UIButton()
-        addButton.isHidden = true
-        addButton.backgroundColor = .systemRed
-        addButton.setTitle("Delete from Favorites", for: .normal)
-        addButton.setTitleColor(.white, for: .normal)
-        addButton.alpha = 0
-        addButton.layer.cornerRadius = 8
-        addButton.titleLabel?.text = ""
-        addButton.translatesAutoresizingMaskIntoConstraints = false
-        addButton.addTarget(.none, action: #selector(deleteFromFavorites), for: .touchUpInside)
-        return addButton
+        var button = UIButton()
+        button.backgroundColor = .systemRed
+        button.setTitle("Delete from Favorites", for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.alpha = 0
+        button.isEnabled = false
+        button.layer.cornerRadius = 8
+        button.titleLabel?.text = ""
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(.none, action: #selector(deleteFromFavorites), for: .touchUpInside)
+        return button
     }()
-    
     lazy var photoLabel: UILabel = {
         var photoLabel = UILabel()
         photoLabel.numberOfLines = 3
@@ -85,7 +77,6 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
         photoLabel.translatesAutoresizingMaskIntoConstraints = false
         return photoLabel
     }()
-    
     private lazy var imageView: UIImageView = {
         var imageView = UIImageView()
         imageView.layer.masksToBounds = true
@@ -95,7 +86,6 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
-    
     private lazy var exitImageView: UIImageView = {
         var exitImageView = UIImageView()
         let exitImage = UIImage(systemName: "xmark.circle.fill")
@@ -108,7 +98,6 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
         exitImageView.translatesAutoresizingMaskIntoConstraints = false
         return exitImageView
     }()
-    
     private lazy var layout: UICollectionViewFlowLayout = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
@@ -117,7 +106,6 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
         layout.sectionInset = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
         return layout
     }()
-    
     private lazy var collectionView: UICollectionView = {
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: self.layout)
         collectionView.dataSource = self
@@ -139,14 +127,13 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
         self.setupTextField()
         self.photoLabelSetup()
         self.buttonsSetup()
-        self.KbdNotificatorAppearance()
+        self.kbdNotificatorAppearance()
     }
-    
     deinit {
-        self.KbdNotificatorRemove()
+        self.kbdNotificatorRemove()
     }
-    
-    func fetchPosts(){
+    // MARK: - Network
+    func fetchPosts() {
         DispatchQueue.global(qos: .utility).async {
             NetworkService().urlRequest { [weak self] posts in
                 guard let self = self else { return }
@@ -159,6 +146,7 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
                     var authors = [String?]()
                     var locations = [String?]()
                     var dates = [String?]()
+                    var id = [String]()
                     try result.forEach { post in
                         self.collectionView.reloadData()
                         guard let pictureName = post.urls.small else { return }
@@ -169,17 +157,18 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
                         authors.append(post.user.name)
                         locations.append(post.user.location)
                         dates.append(post.created_at)
+                        id.append(post.id)
                     }
                     self.images = imagesArray
                     self.authors = authors
                     self.locations = locations
                     self.dates = dates
+                    self.id = id
                 }
             }
         }
     }
-    
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool  {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         do {
             NetworkService().searchRequest(withText: textField.text!) { [weak self] posts in
                 guard let self = self else { return }
@@ -192,6 +181,7 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
                     var authors = [String?]()
                     var locations = [String?]()
                     var dates = [String?]()
+                    var id = [String]()
                     try result.results.forEach { post in
                         if post.urls.small?.isEmpty == false {
                             self.collectionView.reloadData()
@@ -203,6 +193,7 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
                             authors.append(post.user.name)
                             locations.append(post.user.location)
                             dates.append(post.created_at)
+                            id.append(post.id)
                         } else {
                             self.notFoundAlert()
                         }
@@ -211,59 +202,59 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
                     self.authors = authors
                     self.locations = locations
                     self.dates = dates
+                    self.id = id
                 }
             }
         }
         return true
     }
-    
-    //MARK: Keyboard
-    func KbdNotificatorAppearance() {
-        let nc = NotificationCenter.default
-        nc.addObserver(self, selector: #selector(self.kbdShow), name: UIResponder.keyboardWillShowNotification, object: nil)
-        nc.addObserver(self, selector: #selector(self.kbdHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+    // MARK: - Keyboard
+    func kbdNotificatorAppearance() {
+        let notifCenter = NotificationCenter.default
+        notifCenter.addObserver(self,
+                                selector: #selector(self.kbdShow),
+                                name: UIResponder.keyboardWillShowNotification,
+                                object: nil)
+        notifCenter.addObserver(self,
+                                selector: #selector(self.kbdHide),
+                                name: UIResponder.keyboardWillHideNotification,
+                                object: nil)
     }
-        
-    func KbdNotificatorRemove() {
-        let nc = NotificationCenter.default
-        nc.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
-        nc.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
+    func kbdNotificatorRemove() {
+        let notifCenter = NotificationCenter.default
+        notifCenter.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
+        notifCenter.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
     }
-    
     @objc private func kbdShow(notification: NSNotification) {
         if let kbdSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
-            self.collectionView.verticalScrollIndicatorInsets = UIEdgeInsets(top: 0,left: 0, bottom: kbdSize.height, right: 0)
+            self.collectionView.verticalScrollIndicatorInsets = UIEdgeInsets(top: 0,
+                                                                             left: 0,
+                                                                             bottom: kbdSize.height,
+                                                                             right: 0)
         }
     }
-    
     @objc private func kbdHide(notification: NSNotification) {
             self.collectionView.verticalScrollIndicatorInsets = .zero
     }
-    
-    //MARK: Constraints
-    private func viewSetup(){
+    // MARK: - Constraints
+    private func viewSetup() {
         self.view.backgroundColor = .white
     }
-    
-    private func setupTextField(){
+    private func setupTextField() {
         self.view.addSubview(textField)
         self.textField.delegate = self
-        
         let textFieldWidth = self.view.frame.width * 0.85
-        
         let top = self.textField.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: -40)
         let left = self.textField.leftAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leftAnchor, constant: 8)
         let height = self.textField.heightAnchor.constraint(equalToConstant: 40)
         let width = self.textField.widthAnchor.constraint(equalToConstant: textFieldWidth)
-        
         NSLayoutConstraint.activate([top,
                                      left,
                                      height,
                                      width
                                     ])
     }
-    
-    private func setupCollectionView(){
+    private func setupCollectionView() {
         self.navigationItem.title = "Photo Gallery"
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "magnifyingglass"),
                                                                                 style: .plain,
@@ -271,12 +262,10 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
                                                                                 action: #selector(searchAppearance))
         self.navigationController?.navigationBar.isHidden = false
         self.view.addSubview(self.collectionView)
-        
         self.topConstraint = self.collectionView.topAnchor.constraint(equalTo: self.view.topAnchor)
         self.leftConstraint = self.collectionView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor)
         self.rightConstraint = self.collectionView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor)
         self.bottomConstraint = self.collectionView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
-        
         NSLayoutConstraint.activate([
                                     self.topConstraint,
                                     self.leftConstraint,
@@ -284,14 +273,14 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
                                     self.bottomConstraint
                                     ].compactMap({$0}))
     }
-    
-    private func imageSetup(){
+    private func imageSetup() {
         self.view.addSubview(imageView)
 
         let top = self.imageView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: self.view.frame.height/6)
         let right = self.imageView.rightAnchor.constraint(equalTo: self.view.rightAnchor)
         let left = self.imageView.leftAnchor.constraint(equalTo: self.view.leftAnchor)
-        let imageViewAspectRatio = self.imageView.heightAnchor.constraint(equalTo: self.imageView.widthAnchor, multiplier: 1.0)
+        let imageViewAspectRatio = self.imageView.heightAnchor.constraint(equalTo: self.imageView.widthAnchor,
+                                                                          multiplier: 1.0)
 
         NSLayoutConstraint.activate([
                                     top,
@@ -300,8 +289,7 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
                                     left
                                     ])
     }
-    
-    private func photoLabelSetup(){
+    private func photoLabelSetup() {
         self.view.addSubview(photoLabel)
 
         let top = self.photoLabel.topAnchor.constraint(equalTo: self.imageView.bottomAnchor, constant: 20)
@@ -314,26 +302,25 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
                                     left
                                     ])
     }
-    
-    private func buttonsSetup(){
+    private func buttonsSetup() {
         self.view.addSubview(addButton)
         self.view.addSubview(deleteButton)
-        
-        //MARK: Add button
+        // MARK: Add button
         let top = self.addButton.topAnchor.constraint(equalTo: self.photoLabel.bottomAnchor, constant: 20)
-        let left = self.addButton.leftAnchor.constraint(equalTo: self.view.leftAnchor, constant: BasicSpacing.positive.rawValue)
+        let left = self.addButton.leftAnchor.constraint(equalTo: self.view.leftAnchor,
+                                                        constant: BasicSpacing.positive.rawValue)
 
-        //MARK: Delete button
+        // MARK: Delete button
         let top2 = self.deleteButton.topAnchor.constraint(equalTo: self.photoLabel.bottomAnchor, constant: 20)
-        let left2 = self.deleteButton.leftAnchor.constraint(equalTo: self.addButton.rightAnchor, constant: BasicSpacing.positive.rawValue)
-        let right = self.deleteButton.rightAnchor.constraint(equalTo: self.view.rightAnchor, constant: BasicSpacing.negative.rawValue)
-        
-        //MARK: Width calculation
+        let left2 = self.deleteButton.leftAnchor.constraint(equalTo: self.addButton.rightAnchor,
+                                                            constant: BasicSpacing.positive.rawValue)
+        let right = self.deleteButton.rightAnchor.constraint(equalTo: self.view.rightAnchor,
+                                                             constant: BasicSpacing.negative.rawValue)
+        // MARK: Width calculation
         let screenWidth = CGFloat(self.view.frame.width)
         let buttonsWidth = (screenWidth - BasicSpacing.positive.rawValue * 3)/2
         let width = self.addButton.widthAnchor.constraint(equalToConstant: buttonsWidth)
         let width2 = self.deleteButton.widthAnchor.constraint(equalToConstant: buttonsWidth)
-        
         NSLayoutConstraint.activate([
                                     top,
                                     top2,
@@ -344,15 +331,12 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
                                     width2
                                     ])
     }
-    
-    private func exitSetup(){
+    private func exitSetup() {
         self.view.addSubview(exitImageView)
-        
         let top = self.exitImageView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor)
         let right = self.exitImageView.rightAnchor.constraint(equalTo: self.view.rightAnchor)
         let height = self.exitImageView.heightAnchor.constraint(equalToConstant: 40)
         let width = self.exitImageView.widthAnchor.constraint(equalToConstant: 40)
-        
         NSLayoutConstraint.activate([top,
                                      right,
                                      height,
@@ -360,35 +344,50 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
                                     ])
     }
 
-    //MARK: Methods
-    @objc func deleteFromFavorites(){
-        for (index, image) in tempImgArray.enumerated() {
-            guard self.imageView.image == image else { return }
-            self.tempImgArray.remove(at: index)
-            self.tempStrArray.remove(at: index)
+    // MARK: - Methods
+    @objc func deleteFromFavorites() {
+            
+            for (index, id) in self.tempFavArray.enumerated() {
+                if id == favorite {
+                    self.tempImgArray.remove(at: index)
+                    self.tempStrArray.remove(at: index)
+                    self.tempFavArray.remove(at: index)
+                }
+            }
+            
             self.dictionary["authors"] = self.tempStrArray
             self.dictionary["images"] = self.tempImgArray
+            self.dictionary["favorites"] = self.tempImgArray
             NotificationCenter.default.post(name: Notification.Name.dataFromCollection,
                                             object: nil,
                                             userInfo: self.dictionary)
+            self.addButton.alpha = 1
+            self.addButton.isEnabled = true
+            self.deleteButton.alpha = 0.5
+            self.deleteButton.isEnabled = false
             self.collectionView.reloadData()
             self.deletedAlert()
-        }
     }
-    
-    @objc func addToFavorites(){
+    @objc func addToFavorites() {
         guard let image = self.imageView.image else { return }
         self.tempImgArray.append(image)
         guard let author = self.photoLabel.text else { return }
         self.tempStrArray.append(author)
+        self.tempFavArray.append(self.favorite)
+
         self.dictionary["authors"] = self.tempStrArray
         self.dictionary["images"] = self.tempImgArray
+        self.dictionary["favorites"] = self.tempFavArray
         NotificationCenter.default.post(name: Notification.Name.dataFromCollection,
-                                        object: nil, userInfo: self.dictionary)
+                                        object: nil,
+                                        userInfo: self.dictionary)
+        self.addButton.alpha = 0.5
+        self.addButton.isEnabled = false
+        self.deleteButton.alpha = 1
+        self.deleteButton.isEnabled = true
         self.collectionView.reloadData()
         self.addedAlert()
     }
-    
     private func deletedAlert() {
         let alert = UIAlertController(title: Alert.warningTitle.rawValue,
                                       message: Alert.warningMessage.rawValue,
@@ -398,7 +397,6 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
         present(alert, animated: true, completion: .none)
         alert.addAction(action)
     }
-    
     private func notFoundAlert() {
         let alert = UIAlertController(title: Alert.notFoundTitle.rawValue,
                                       message: nil,
@@ -408,7 +406,6 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
         present(alert, animated: true, completion: .none)
         alert.addAction(action)
     }
-    
     private func addedAlert() {
         let alert = UIAlertController(title: Alert.greatTitle.rawValue,
                                       message: Alert.greatMessage.rawValue,
@@ -418,13 +415,12 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
         present(alert, animated: true, completion: .none)
         alert.addAction(action)
     }
-    
-    func imageZoom(forCell: IndexPath){
+    func imageZoom(forCell: IndexPath) {
         textField.resignFirstResponder()
         self.imageView.image = self.images[forCell.row]
         guard let author = self.authors[forCell.row] else { return }
         guard let date = self.dates[forCell.row] else { return }
-        
+        self.favorite = self.id[forCell.row]
         var newLocations = [String?]()
         for location in locations {
             if location == nil {
@@ -435,39 +431,43 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
         }
 
         guard let location = newLocations[forCell.row] else { return }
-        let viewModel = PhotosViewController.ViewModel(author: author,
-                                                       creationDate: date,
-                                                       location: location)
-        
+        let viewModel = ViewModel(author: author,
+                                  creationDate: date,
+                                  location: location)
         self.setup(with: viewModel)
-        
         UIView.animate(withDuration: 0.5, delay: 0.0) {
-            
             self.imageView.isHidden = false
             self.imageView.alpha = 1
             self.photoLabel.isHidden = false
             self.photoLabel.alpha = 1
-            self.addButton.isHidden = false
             self.addButton.alpha = 1
-            self.deleteButton.isHidden = false
-            self.deleteButton.alpha = 1
+            self.deleteButton.alpha = 0.5
+            
+            if self.tempFavArray.contains(self.favorite) {
+                self.deleteButton.alpha = 1
+                self.deleteButton.isEnabled = true
+                self.addButton.alpha = 0.5
+                self.addButton.isEnabled = false
+            } else {
+                self.deleteButton.alpha = 0.5
+                self.deleteButton.isEnabled = false
+                self.addButton.alpha = 1
+                self.addButton.isEnabled = true
+            }
             self.topConstraint?.isActive = false
             self.leftConstraint?.isActive = false
             self.rightConstraint?.isActive = false
             self.bottomConstraint?.isActive = false
-            
             self.exitImageView.isHidden = false
             self.exitImageView.alpha = 1
             self.view.layoutIfNeeded()
         }
     }
-    
-    func setupExitGesture(){
+    func setupExitGesture() {
         self.exitImageView.addGestureRecognizer(self.exitTapGesture)
         self.exitTapGesture.addTarget(self, action: #selector(self.exitHandleTapGesture))
     }
-    
-    @objc private func exitHandleTapGesture(_ gestureRecognizer: UITapGestureRecognizer){
+    @objc private func exitHandleTapGesture(_ gestureRecognizer: UITapGestureRecognizer) {
         guard self.exitTapGesture === gestureRecognizer else { return }
 
         self.isExpanded.toggle()
@@ -489,8 +489,7 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
             }
         }
     }
-    
-    @objc private func searchAppearance(){
+    @objc private func searchAppearance() {
         UIView.animate(withDuration: 0.5, delay: 0.0) {
             self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "xmark"),
                                                                      style: .plain,
@@ -503,8 +502,7 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
             self.view.layoutIfNeeded()
         }
     }
-    
-    @objc private func searchDisappearance(){
+    @objc private func searchDisappearance() {
         UIView.animate(withDuration: 0.5, delay: 0.0) {
             self.textField.alpha = 0
             self.textField.isHidden = true

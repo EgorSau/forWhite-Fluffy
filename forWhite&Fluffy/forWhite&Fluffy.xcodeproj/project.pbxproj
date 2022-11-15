@@ -14,7 +14,7 @@
 		20C2248228C3572E0057037A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 20C2248128C3572E0057037A /* Assets.xcassets */; };
 		20C2248528C3572E0057037A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 20C2248328C3572E0057037A /* LaunchScreen.storyboard */; };
 		20C2249228C358C50057037A /* TabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20C2249128C358C50057037A /* TabBarController.swift */; };
-		20C2249428C358E20057037A /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20C2249328C358E20057037A /* Model.swift */; };
+		20C2249428C358E20057037A /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20C2249328C358E20057037A /* Models.swift */; };
 		20C2249628C358EB0057037A /* PhotosViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20C2249528C358EB0057037A /* PhotosViewController.swift */; };
 		20C2249828C358F50057037A /* PhotosCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20C2249728C358F50057037A /* PhotosCollectionViewCell.swift */; };
 		20C2249A28C359380057037A /* TableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20C2249928C359380057037A /* TableViewController.swift */; };
@@ -34,7 +34,7 @@
 		20C2248428C3572E0057037A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		20C2248628C3572E0057037A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		20C2249128C358C50057037A /* TabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarController.swift; sourceTree = "<group>"; };
-		20C2249328C358E20057037A /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
+		20C2249328C358E20057037A /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		20C2249528C358EB0057037A /* PhotosViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotosViewController.swift; sourceTree = "<group>"; };
 		20C2249728C358F50057037A /* PhotosCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotosCollectionViewCell.swift; sourceTree = "<group>"; };
 		20C2249928C359380057037A /* TableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableViewController.swift; sourceTree = "<group>"; };
@@ -147,7 +147,7 @@
 		20C2249F28C359770057037A /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				20C2249328C358E20057037A /* Model.swift */,
+				20C2249328C358E20057037A /* Models.swift */,
 				20C224A028C361940057037A /* NetworkService.swift */,
 				2094B0C328C4F447001CC26C /* Constants.swift */,
 			);
@@ -285,7 +285,7 @@
 				20C2247928C3572C0057037A /* AppDelegate.swift in Sources */,
 				20C2249C28C359440057037A /* DetailsViewController.swift in Sources */,
 				20C2247B28C3572C0057037A /* SceneDelegate.swift in Sources */,
-				20C2249428C358E20057037A /* Model.swift in Sources */,
+				20C2249428C358E20057037A /* Models.swift in Sources */,
 				20C2249628C358EB0057037A /* PhotosViewController.swift in Sources */,
 				20C2249828C358F50057037A /* PhotosCollectionViewCell.swift in Sources */,
 				2094B0C428C4F447001CC26C /* Constants.swift in Sources */,

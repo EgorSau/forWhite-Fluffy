@@ -10,21 +10,11 @@ import UIKit
 class PhotosViewController: UIViewController, UITextFieldDelegate {
     var isExpanded = false
     let exitTapGesture = UITapGestureRecognizer()
-    var images = [UIImage]()
-    var authors = [String?]()
-    var dates = [String?]()
-    var locations = [String?]()
-    var id = [String]()
     var topConstraint: NSLayoutConstraint?
     var leftConstraint: NSLayoutConstraint?
     var rightConstraint: NSLayoutConstraint?
     var bottomConstraint: NSLayoutConstraint?
-    var tempStrArray = [String]()
-    var tempImgArray = [UIImage]()
-    var tempFavArray = [String]()
-    var dictionary: [String: Any] = ["authors": [String](), "images": [UIImage](), "favorites": [String]()]
     var favorite = ""
-
     lazy var textField: UITextField = {
         let textField = UITextField()
         textField.backgroundColor = .white
@@ -115,7 +105,10 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         return collectionView
     }()
-
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.collectionView.reloadData()
+    }
     override func viewDidLoad() {
         super.viewDidLoad()
         self.fetchPosts()
@@ -139,31 +132,30 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
                 guard let self = self else { return }
                 switch posts {
                 case .failure(let error):
-                    print("ОШИБКА")
-                    print(error)
+                    print(error.localizedDescription)
                 case .success(let result):
-                    var imagesArray = [UIImage]()
+                    var images = [UIImage]()
                     var authors = [String?]()
                     var locations = [String?]()
                     var dates = [String?]()
-                    var id = [String]()
+                    var ids = [String]()
                     try result.forEach { post in
                         self.collectionView.reloadData()
                         guard let pictureName = post.urls.small else { return }
                         guard let url = URL(string: pictureName) else { return }
                         let data = try Data(contentsOf: url, options: [])
                         guard let image = UIImage(data: data) else { return }
-                        imagesArray.append(image)
+                        images.append(image)
                         authors.append(post.user.name)
                         locations.append(post.user.location)
                         dates.append(post.created_at)
-                        id.append(post.id)
+                        ids.append(post.id)
                     }
-                    self.images = imagesArray
-                    self.authors = authors
-                    self.locations = locations
-                    self.dates = dates
-                    self.id = id
+                    PostModel.images = images
+                    PostModel.authors = authors
+                    PostModel.locations = locations
+                    PostModel.dates = dates
+                    PostModel.ids = ids
                 }
             }
         }
@@ -174,35 +166,34 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
                 guard let self = self else { return }
                 switch posts {
                 case .failure(let error):
-                    print("ОШИБКА")
-                    print(error)
+                    print(error.localizedDescription)
                 case .success(let result):
-                    var imagesArray = [UIImage]()
-                    var authors = [String?]()
-                    var locations = [String?]()
-                    var dates = [String?]()
-                    var id = [String]()
-                    try result.results.forEach { post in
-                        if post.urls.small?.isEmpty == false {
+                    if result.results.isEmpty {
+                        self.notFoundAlert()
+                    } else {
+                        var images = [UIImage]()
+                        var authors = [String?]()
+                        var locations = [String?]()
+                        var dates = [String?]()
+                        var ids = [String]()
+                        try result.results.forEach { post in
                             self.collectionView.reloadData()
                             guard let pictureName = post.urls.small else { return }
                             guard let url = URL(string: pictureName) else { return }
                             let data = try Data(contentsOf: url, options: [])
                             guard let image = UIImage(data: data) else { return }
-                            imagesArray.append(image)
+                            images.append(image)
                             authors.append(post.user.name)
                             locations.append(post.user.location)
                             dates.append(post.created_at)
-                            id.append(post.id)
-                        } else {
-                            self.notFoundAlert()
+                            ids.append(post.id)
                         }
+                        PostModel.images = images
+                        PostModel.authors = authors
+                        PostModel.locations = locations
+                        PostModel.dates = dates
+                        PostModel.ids = ids
                     }
-                    self.images = imagesArray
-                    self.authors = authors
-                    self.locations = locations
-                    self.dates = dates
-                    self.id = id
                 }
             }
         }
@@ -275,13 +266,11 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
     }
     private func imageSetup() {
         self.view.addSubview(imageView)
-
         let top = self.imageView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: self.view.frame.height/6)
         let right = self.imageView.rightAnchor.constraint(equalTo: self.view.rightAnchor)
         let left = self.imageView.leftAnchor.constraint(equalTo: self.view.leftAnchor)
         let imageViewAspectRatio = self.imageView.heightAnchor.constraint(equalTo: self.imageView.widthAnchor,
                                                                           multiplier: 1.0)
-
         NSLayoutConstraint.activate([
                                     top,
                                     imageViewAspectRatio,
@@ -291,11 +280,9 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
     }
     private func photoLabelSetup() {
         self.view.addSubview(photoLabel)
-
         let top = self.photoLabel.topAnchor.constraint(equalTo: self.imageView.bottomAnchor, constant: 20)
         let right = self.photoLabel.rightAnchor.constraint(equalTo: self.view.rightAnchor)
         let left = self.photoLabel.leftAnchor.constraint(equalTo: self.view.leftAnchor)
-
         NSLayoutConstraint.activate([
                                     top,
                                     right,
@@ -308,17 +295,17 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
         // MARK: Add button
         let top = self.addButton.topAnchor.constraint(equalTo: self.photoLabel.bottomAnchor, constant: 20)
         let left = self.addButton.leftAnchor.constraint(equalTo: self.view.leftAnchor,
-                                                        constant: BasicSpacing.positive.rawValue)
+                                                        constant: BasicSpacing.positive)
 
         // MARK: Delete button
         let top2 = self.deleteButton.topAnchor.constraint(equalTo: self.photoLabel.bottomAnchor, constant: 20)
         let left2 = self.deleteButton.leftAnchor.constraint(equalTo: self.addButton.rightAnchor,
-                                                            constant: BasicSpacing.positive.rawValue)
+                                                            constant: BasicSpacing.positive)
         let right = self.deleteButton.rightAnchor.constraint(equalTo: self.view.rightAnchor,
-                                                             constant: BasicSpacing.negative.rawValue)
+                                                             constant: BasicSpacing.negative)
         // MARK: Width calculation
         let screenWidth = CGFloat(self.view.frame.width)
-        let buttonsWidth = (screenWidth - BasicSpacing.positive.rawValue * 3)/2
+        let buttonsWidth = (screenWidth - BasicSpacing.positive * 3)/2
         let width = self.addButton.widthAnchor.constraint(equalToConstant: buttonsWidth)
         let width2 = self.deleteButton.widthAnchor.constraint(equalToConstant: buttonsWidth)
         NSLayoutConstraint.activate([
@@ -343,44 +330,22 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
                                      width
                                     ])
     }
-
     // MARK: - Methods
     @objc func deleteFromFavorites() {
-            
-            for (index, id) in self.tempFavArray.enumerated() {
-                if id == favorite {
-                    self.tempImgArray.remove(at: index)
-                    self.tempStrArray.remove(at: index)
-                    self.tempFavArray.remove(at: index)
-                }
+        for (index, id) in PostModel.favorites.enumerated() {
+            if id == self.favorite {
+                PostModel.favorites.remove(at: index)
             }
-            
-            self.dictionary["authors"] = self.tempStrArray
-            self.dictionary["images"] = self.tempImgArray
-            self.dictionary["favorites"] = self.tempImgArray
-            NotificationCenter.default.post(name: Notification.Name.dataFromCollection,
-                                            object: nil,
-                                            userInfo: self.dictionary)
-            self.addButton.alpha = 1
-            self.addButton.isEnabled = true
-            self.deleteButton.alpha = 0.5
-            self.deleteButton.isEnabled = false
-            self.collectionView.reloadData()
-            self.deletedAlert()
+        }
+        self.addButton.alpha = 1
+        self.addButton.isEnabled = true
+        self.deleteButton.alpha = 0.5
+        self.deleteButton.isEnabled = false
+        self.collectionView.reloadData()
+        self.deletedAlert()
     }
-    @objc func addToFavorites() {
-        guard let image = self.imageView.image else { return }
-        self.tempImgArray.append(image)
-        guard let author = self.photoLabel.text else { return }
-        self.tempStrArray.append(author)
-        self.tempFavArray.append(self.favorite)
-
-        self.dictionary["authors"] = self.tempStrArray
-        self.dictionary["images"] = self.tempImgArray
-        self.dictionary["favorites"] = self.tempFavArray
-        NotificationCenter.default.post(name: Notification.Name.dataFromCollection,
-                                        object: nil,
-                                        userInfo: self.dictionary)
+    @objc private func addToFavorites() {
+        PostModel.favorites.append(favorite)
         self.addButton.alpha = 0.5
         self.addButton.isEnabled = false
         self.deleteButton.alpha = 1
@@ -389,47 +354,46 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
         self.addedAlert()
     }
     private func deletedAlert() {
-        let alert = UIAlertController(title: Alert.warningTitle.rawValue,
-                                      message: Alert.warningMessage.rawValue,
+        let alert = UIAlertController(title: Alert.warningTitle,
+                                      message: Alert.warningMessage,
                                       preferredStyle: .alert)
-        let action = UIAlertAction(title: Alert.actionTitle.rawValue,
+        let action = UIAlertAction(title: Alert.actionTitle,
                                    style: .default)
         present(alert, animated: true, completion: .none)
         alert.addAction(action)
     }
     private func notFoundAlert() {
-        let alert = UIAlertController(title: Alert.notFoundTitle.rawValue,
+        let alert = UIAlertController(title: Alert.notFoundTitle,
                                       message: nil,
                                       preferredStyle: .alert)
-        let action = UIAlertAction(title: Alert.actionTitle.rawValue,
+        let action = UIAlertAction(title: Alert.actionTitle,
                                    style: .default)
         present(alert, animated: true, completion: .none)
         alert.addAction(action)
     }
     private func addedAlert() {
-        let alert = UIAlertController(title: Alert.greatTitle.rawValue,
-                                      message: Alert.greatMessage.rawValue,
+        let alert = UIAlertController(title: Alert.greatTitle,
+                                      message: Alert.greatMessage,
                                       preferredStyle: .alert)
-        let action = UIAlertAction(title: Alert.actionTitle.rawValue,
+        let action = UIAlertAction(title: Alert.actionTitle,
                                    style: .default)
         present(alert, animated: true, completion: .none)
         alert.addAction(action)
     }
     func imageZoom(forCell: IndexPath) {
         textField.resignFirstResponder()
-        self.imageView.image = self.images[forCell.row]
-        guard let author = self.authors[forCell.row] else { return }
-        guard let date = self.dates[forCell.row] else { return }
-        self.favorite = self.id[forCell.row]
+        self.imageView.image = PostModel.images[forCell.row]
+        guard let author = PostModel.authors[forCell.row] else { return }
+        guard let date = PostModel.dates[forCell.row] else { return }
+        self.favorite = PostModel.ids[forCell.row]
         var newLocations = [String?]()
-        for location in locations {
+        for location in PostModel.locations {
             if location == nil {
                 newLocations.append("No location")
             } else {
                 newLocations.append(location)
             }
         }
-
         guard let location = newLocations[forCell.row] else { return }
         let viewModel = ViewModel(author: author,
                                   creationDate: date,
@@ -442,8 +406,7 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
             self.photoLabel.alpha = 1
             self.addButton.alpha = 1
             self.deleteButton.alpha = 0.5
-            
-            if self.tempFavArray.contains(self.favorite) {
+            if PostModel.favorites.contains(self.favorite) {
                 self.deleteButton.alpha = 1
                 self.deleteButton.isEnabled = true
                 self.addButton.alpha = 0.5
@@ -463,13 +426,16 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
             self.view.layoutIfNeeded()
         }
     }
-    func setupExitGesture() {
+    private func setupExitGesture() {
         self.exitImageView.addGestureRecognizer(self.exitTapGesture)
         self.exitTapGesture.addTarget(self, action: #selector(self.exitHandleTapGesture))
     }
     @objc private func exitHandleTapGesture(_ gestureRecognizer: UITapGestureRecognizer) {
         guard self.exitTapGesture === gestureRecognizer else { return }
-
+        self.exit()
+    }
+    
+    private func exit() {
         self.isExpanded.toggle()
         if self.isExpanded {
             UIView.animate(withDuration: 0.5, delay: 0.0) {

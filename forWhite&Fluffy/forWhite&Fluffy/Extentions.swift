@@ -26,10 +26,10 @@ extension PhotosViewController: UICollectionViewDataSource, UICollectionViewDele
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "DefaultCell", for: indexPath)
             return cell
         }
-        if self.images.isEmpty {
+        if PostModel.images.isEmpty {
             collectionView.reloadData()
         } else {
-            cell.photoImage.image = self.images[indexPath.row]
+            cell.photoImage.image = PostModel.images[indexPath.row]
         }
         return cell
     }

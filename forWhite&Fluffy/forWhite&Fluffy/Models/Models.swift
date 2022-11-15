@@ -1,5 +1,5 @@
 //
-//  Model.swift
+//  Models.swift
 //  forWhite&Fluffy
 //
 //  Created by Egor SAUSHKIN on 03.09.2022.
@@ -42,4 +42,14 @@ struct ViewModel: ViewModelProtocol {
     let author: String
     let creationDate: String
     let location: String
+}
+
+struct PostModel {
+    static var images = [UIImage]()
+    static var dates = [String?]()
+    static var locations = [String?]()
+    static var authors = [String?]()
+    static var ids = [String]()
+    static var favorites = [String]()
+    static var favoritesPath = [Int]()
 }

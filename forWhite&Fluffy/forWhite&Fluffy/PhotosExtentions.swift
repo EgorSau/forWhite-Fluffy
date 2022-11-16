@@ -1,5 +1,5 @@
 //
-//  Extentions.swift
+//  PhotosExtentions.swift
 //  forWhite&Fluffy
 //
 //  Created by Egor SAUSHKIN on 04.09.2022.

@@ -7,8 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2094B0C228C4F2A8001CC26C /* Extentions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2094B0C128C4F2A8001CC26C /* Extentions.swift */; };
+		2094B0C228C4F2A8001CC26C /* PhotosExtentions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2094B0C128C4F2A8001CC26C /* PhotosExtentions.swift */; };
 		2094B0C428C4F447001CC26C /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2094B0C328C4F447001CC26C /* Constants.swift */; };
+		20B467F529258A1200D6D1B1 /* PhotoConstraints.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20B467F429258A1200D6D1B1 /* PhotoConstraints.swift */; };
 		20C2247928C3572C0057037A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20C2247828C3572C0057037A /* AppDelegate.swift */; };
 		20C2247B28C3572C0057037A /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20C2247A28C3572C0057037A /* SceneDelegate.swift */; };
 		20C2248228C3572E0057037A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 20C2248128C3572E0057037A /* Assets.xcassets */; };
@@ -25,8 +26,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		2094B0C128C4F2A8001CC26C /* Extentions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extentions.swift; sourceTree = "<group>"; };
+		2094B0C128C4F2A8001CC26C /* PhotosExtentions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotosExtentions.swift; sourceTree = "<group>"; };
 		2094B0C328C4F447001CC26C /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		20B467F429258A1200D6D1B1 /* PhotoConstraints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoConstraints.swift; sourceTree = "<group>"; };
 		20C2247528C3572C0057037A /* forWhite&Fluffy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "forWhite&Fluffy.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		20C2247828C3572C0057037A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		20C2247A28C3572C0057037A /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -90,8 +92,8 @@
 				20C2248C28C3586F0057037A /* Scene */,
 				20C2248D28C358770057037A /* TabBar */,
 				20C2249F28C359770057037A /* Models */,
-				20C2248E28C358800057037A /* Collection */,
-				20C2248F28C358890057037A /* Table */,
+				20C2248E28C358800057037A /* Controllers */,
+				20C2248F28C358890057037A /* Views */,
 				20C2249028C358900057037A /* Resources */,
 			);
 			path = "forWhite&Fluffy";
@@ -114,24 +116,25 @@
 			path = TabBar;
 			sourceTree = "<group>";
 		};
-		20C2248E28C358800057037A /* Collection */ = {
+		20C2248E28C358800057037A /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
 				20C2249528C358EB0057037A /* PhotosViewController.swift */,
-				20C2249728C358F50057037A /* PhotosCollectionViewCell.swift */,
-				2094B0C128C4F2A8001CC26C /* Extentions.swift */,
-			);
-			name = Collection;
-			sourceTree = "<group>";
-		};
-		20C2248F28C358890057037A /* Table */ = {
-			isa = PBXGroup;
-			children = (
 				20C2249928C359380057037A /* TableViewController.swift */,
 				20C2249B28C359440057037A /* DetailsViewController.swift */,
+				2094B0C128C4F2A8001CC26C /* PhotosExtentions.swift */,
+			);
+			name = Controllers;
+			sourceTree = "<group>";
+		};
+		20C2248F28C358890057037A /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				20B467F429258A1200D6D1B1 /* PhotoConstraints.swift */,
+				20C2249728C358F50057037A /* PhotosCollectionViewCell.swift */,
 				20C2249D28C3594F0057037A /* PhotosTableViewCell.swift */,
 			);
-			path = Table;
+			path = Views;
 			sourceTree = "<group>";
 		};
 		20C2249028C358900057037A /* Resources */ = {
@@ -280,7 +283,8 @@
 				20C224A128C361940057037A /* NetworkService.swift in Sources */,
 				20C2249E28C3594F0057037A /* PhotosTableViewCell.swift in Sources */,
 				20C2249228C358C50057037A /* TabBarController.swift in Sources */,
-				2094B0C228C4F2A8001CC26C /* Extentions.swift in Sources */,
+				20B467F529258A1200D6D1B1 /* PhotoConstraints.swift in Sources */,
+				2094B0C228C4F2A8001CC26C /* PhotosExtentions.swift in Sources */,
 				20C2249A28C359380057037A /* TableViewController.swift in Sources */,
 				20C2247928C3572C0057037A /* AppDelegate.swift in Sources */,
 				20C2249C28C359440057037A /* DetailsViewController.swift in Sources */,

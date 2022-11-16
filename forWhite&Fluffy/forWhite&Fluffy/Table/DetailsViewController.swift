@@ -37,7 +37,6 @@ class DetailsViewController: UIViewController {
         self.text = text
         super.init(nibName: nil, bundle: Bundle(identifier: "essaushkin.forWhite-Fluffy"))
     }
-    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

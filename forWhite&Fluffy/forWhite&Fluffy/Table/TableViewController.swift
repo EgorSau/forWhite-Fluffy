@@ -70,14 +70,17 @@ extension TableViewController: UITableViewDelegate, UITableViewDataSource {
             let cell = tableView.dequeueReusableCell(withIdentifier: "DefaultCell", for: indexPath)
             return cell
         }
+        guard let favoritesArray = UserDefaults.standard.array(forKey: "favorite") else { return cell }
+        let mappedArray = favoritesArray.map { favorite in
+            favorite as? String
+        }
         if PostModel.favorites.isEmpty == false {
-            let favorite = PostModel.favorites[indexPath.row]
+            let favorite = mappedArray[indexPath.row]
             PostModel.ids.enumerated().forEach { index, id in
                 if id == favorite {
                     cell.imageView?.image = PostModel.images[index]
                     cell.textLabel?.text = PostModel.authors[index]
                     if PostModel.favoritesPath.contains(index) {
-                        
                     } else {
                         PostModel.favoritesPath.append(index)
                     }

@@ -15,6 +15,7 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
     var rightConstraint: NSLayoutConstraint?
     var bottomConstraint: NSLayoutConstraint?
     var favorite = ""
+    let defaults = UserDefaults.standard
     lazy var textField: UITextField = {
         let textField = UITextField()
         textField.backgroundColor = .white
@@ -332,10 +333,10 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
     }
     // MARK: - Methods
     @objc func deleteFromFavorites() {
-        for (index, id) in PostModel.favorites.enumerated() {
-            if id == self.favorite {
+        for (index, id) in PostModel.favorites.enumerated() where id == self.favorite {
+//            if id == self.favorite {
                 PostModel.favorites.remove(at: index)
-            }
+//            }
         }
         self.addButton.alpha = 1
         self.addButton.isEnabled = true
@@ -346,6 +347,7 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
     }
     @objc private func addToFavorites() {
         PostModel.favorites.append(favorite)
+        self.defaults.set(PostModel.favorites, forKey: "favorite")
         self.addButton.alpha = 0.5
         self.addButton.isEnabled = false
         self.deleteButton.alpha = 1
@@ -434,7 +436,6 @@ class PhotosViewController: UIViewController, UITextFieldDelegate {
         guard self.exitTapGesture === gestureRecognizer else { return }
         self.exit()
     }
-    
     private func exit() {
         self.isExpanded.toggle()
         if self.isExpanded {
